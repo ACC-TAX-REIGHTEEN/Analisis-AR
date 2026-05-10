@@ -2,19 +2,18 @@ import pandas as pd
 import xlsxwriter
 from datetime import datetime
 import os
+import sys
 import configparser
 
 def cek_status_jt(conf_filename):
-    """Mengecek apakah fitur [JT] diaktifkan (YES) di dalam file config"""
     if not os.path.exists(conf_filename):
         return False
     
     try:
         config = configparser.ConfigParser()
         config.read(conf_filename)
-   
+        
         if config.has_section('JT'):
-         
             return config.getboolean('JT', 'Aktif', fallback=False)
             
     except Exception as e:
@@ -33,7 +32,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
 
     with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
         workbook = writer.book
-  
+        
         fmt_header      = workbook.add_format({'bold': True, 'bg_color': '#4472C4', 'font_color': 'white', 'border': 1, 'align': 'center', 'valign': 'vcenter'})
         fmt_sub_header  = workbook.add_format({'bold': True, 'bg_color': '#D9E1F2', 'border': 1, 'font_color': 'black'})
         fmt_currency    = workbook.add_format({'num_format': '_-Rp* #,##0_-;-Rp* #,##0_-;_-Rp* "-"_-;_-@_-', 'border': 1})
@@ -45,17 +44,17 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
 
         for sheet_name, df_original in all_sheets.items():
             print(f"Processing Data: {sheet_name}...")
-        
+            
             sheets_to_process = [(sheet_name, df_original)]
             
             if is_jt_active:
                 print(f" -> Membuat Sheet Analisis JT untuk: {sheet_name}...")
                 df_jt = df_original.copy()
-             
+                
                 col_sales_idx = 8 
                 nama_sales_col = df_jt.columns[col_sales_idx]
                 df_jt = df_jt[~df_jt[nama_sales_col].astype(str).str.contains('FRAUD', case=False, na=False)]
-          
+                
                 col_umur_idx = 6
                 def temporary_clean_umur(val):
                     try: return int(float(str(val).lower().replace(' hari', '').replace(' ', '')))
@@ -64,14 +63,14 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                 df_jt['Umur_Temp'] = df_jt.iloc[:, col_umur_idx].apply(temporary_clean_umur)
                 df_jt = df_jt[df_jt['Umur_Temp'] >= 0]
                 df_jt = df_jt.drop(columns=['Umur_Temp'])
-         
+                
                 sheets_to_process.append((f"{sheet_name} JT", df_jt))
-
+                
             for current_sheet_name, df in sheets_to_process:
-          
+
                 if df.empty:
                     continue
- 
+                    
                 col_tgl_idx = 2 
                 tgl_clean = df.iloc[:, col_tgl_idx].astype(str)
                 replacements = {
@@ -98,7 +97,6 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                 df['Kategori'] = df['Umur_Int'].apply(get_bucket)
 
                 col_sisa_idx = 5
-              
                 df.iloc[:, col_sisa_idx] = pd.to_numeric(df.iloc[:, col_sisa_idx], errors='coerce').fillna(0)
 
                 col_sales_name = df.columns[8] 
@@ -110,15 +108,15 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                 cols_order = [c for c in desired_order if c in pivot.columns]
                 pivot = pivot[cols_order]
                 pivot['Grand Total'] = pivot.sum(axis=1)
-
+                
                 df_overdue_60 = df[df['Umur_Int'] > 60].copy()
                 df_overdue_60[col_sisa_name] = pd.to_numeric(df_overdue_60[col_sisa_name], errors='coerce').fillna(0)
-             
+                
                 if not df_overdue_60.empty:
                     top_10_outlet = df_overdue_60.groupby([col_outlet_name, col_sales_name])[col_sisa_name].sum().nlargest(10).reset_index()
                 else:
                     top_10_outlet = pd.DataFrame(columns=[col_outlet_name, col_sales_name, col_sisa_name])
-
+                    
                 worksheet = workbook.add_worksheet(current_sheet_name)
                 worksheet.write(0, 0, f"LAPORAN ANALITIK PIUTANG - {current_sheet_name.upper()}", fmt_title)
 
@@ -127,7 +125,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                     length = (len(f"{val:,.0f}") + 8) if is_currency else (len(str(val)) + 3)
                     if c not in col_widths or length > col_widths[c]:
                         col_widths[c] = length
-
+                        
                 start_row = 2
                 worksheet.write(start_row, 0, "RINGKASAN PERFORMA SALES", fmt_sub_header)
                 worksheet.write(start_row+1, 0, "Nama Penjual", fmt_header)
@@ -146,7 +144,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                         update_w(c+1, row_data[col_name], is_currency=True)
                 
                 last_summary_row = start_row + 2 + len(pivot)
-
+                
                 top_10_start_col = 7
                 worksheet.write(start_row, top_10_start_col, "TOP 10 OUTLET (JATUH TEMPO > 60 HARI)", fmt_sub_header)
                 worksheet.write(start_row+1, top_10_start_col, "Nama Outlet/Toko", fmt_header)
@@ -166,7 +164,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                     
                     worksheet.write(start_row+2+r, top_10_start_col+2, row[col_sisa_name], fmt_currency)
                     update_w(top_10_start_col+2, row[col_sisa_name], is_currency=True)
-
+                    
                 chart = workbook.add_chart({'type': 'pie'})
                 chart.add_series({
                     'name':       'Porsi Piutang per Sales',
@@ -178,7 +176,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                 chart.set_legend({'position': 'bottom'})
                 chart.set_size({'width': 550, 'height': 400}) 
                 worksheet.insert_chart(2, top_10_start_col + 4, chart)
-
+                
                 list_start_row = max(last_summary_row + 3, 18)
                 worksheet.write(list_start_row, 0, "RINCIAN DETIL TRANSAKSI", fmt_title)
                 list_start_row += 2
@@ -218,7 +216,7 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                         update_w(9, row['Kategori'])
                         current_row += 1
                     current_row += 1
-
+                    
                 for col_idx, width in col_widths.items():
                     worksheet.set_column(col_idx, col_idx, min(width, 50))
 
@@ -226,12 +224,20 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
 
 input_filename = 'cleandepotemp.xlsx'
 output_filename = 'Laporan_Analisis_Piutang.xlsx'
-config_filename = 'selatan.conf'
+config_filename = 'customized.conf'
 
 if __name__ == "__main__":
- 
-    is_jt_active = cek_status_jt(config_filename)
-    if is_jt_active:
-        print("-> Mode Analisis Jatuh Tempo (JT) AKTIF berdasarkan config.")
+    if len(sys.argv) > 1:
+        config_filename = sys.argv[1]
+        print(f"--> Menjalankan analisis menggunakan config: {config_filename}")
+    else:
+        print(f"--> Tidak ada input file. Menggunakan default: {config_filename}")
         
+    is_jt_active = cek_status_jt(config_filename)
+    
+    if is_jt_active:
+        print(f"-> Mode Analisis Jatuh Tempo (JT) AKTIF untuk {config_filename}.")
+    else:
+        print(f"-> Mode Analisis Jatuh Tempo (JT) MATI untuk {config_filename}.")
+           
     analisa_piutang_satu_file_fix(input_filename, output_filename, is_jt_active)
