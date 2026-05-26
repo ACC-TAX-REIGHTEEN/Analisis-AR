@@ -72,16 +72,35 @@ def analisa_piutang_satu_file_fix(input_file, output_file, is_jt_active):
                     continue
                     
                 col_tgl_idx = 2 
-                tgl_clean = df.iloc[:, col_tgl_idx].astype(str)
-                replacements = {
-                    ' Jan ': ' Jan ', ' Feb ': ' Feb ', ' Mar ': ' Mar ', ' Apr ': ' Apr ',
-                    ' Mei ': ' May ', ' Jun ': ' Jun ', ' Jul ': ' Jul ', ' Agu ': ' Aug ',
-                    ' Sep ': ' Sep ', ' Okt ': ' Oct ', ' Nop ': ' Nov ', ' Des ': ' Dec '
-                }
-                for indo, eng in replacements.items():
-                    tgl_clean = tgl_clean.str.replace(indo, eng, case=False, regex=False)
                 
-                df['Tgl_Sort'] = pd.to_datetime(tgl_clean, errors='coerce', dayfirst=True)
+                def paksa_jadi_tanggal(val):
+                    if pd.isna(val):
+                        return pd.NaT
+                    
+                    val_str = str(val).strip()
+                    
+                    bulan_indo_eng = {
+                        'jan': 'Jan', 'feb': 'Feb', 'mar': 'Mar', 'apr': 'Apr',
+                        'mei': 'May', 'jun': 'Jun', 'jul': 'Jul', 'agu': 'Aug',
+                        'ags': 'Aug', 'sep': 'Sep', 'okt': 'Oct', 'nop': 'Nov', 
+                        'nov': 'Nov', 'des': 'Dec'
+                    }
+                    
+                    val_lower = val_str.lower()
+                    for indo, eng in bulan_indo_eng.items():
+                        if indo in val_lower:
+                            val_str = val_lower.replace(indo, eng)
+                            break
+                    
+                    for fmt in ('%d/%m/%Y', '%d %b %Y', '%Y-%m-%d %H:%M:%S', '%d-%m-%Y'):
+                        try:
+                            return pd.to_datetime(val_str, format=fmt)
+                        except ValueError:
+                            continue
+                            
+                    return pd.to_datetime(val_str, errors='coerce', dayfirst=True)
+
+                df['Tgl_Sort'] = df.iloc[:, col_tgl_idx].apply(paksa_jadi_tanggal)
 
                 col_umur_idx = 6 
                 def clean_umur(val):
