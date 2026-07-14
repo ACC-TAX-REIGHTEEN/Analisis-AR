@@ -95,7 +95,7 @@ def split_depo_final(input_file, output_file, config_file):
         print(f"Error: {e}")
 
 if __name__ == "__main__":
-    input_filename = 'ExportFile_cleantemp.xlsx' 
+    input_filename = 'Piutang_cleantemp.xlsx' 
     output_filename = 'cleandepotemp.xlsx'
     config_filename = 'customized.conf'
 

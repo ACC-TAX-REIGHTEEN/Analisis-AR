@@ -61,7 +61,7 @@ def split_depo_config(input_file, output_file, config_file):
     except Exception as e:
         print(f"Terjadi kesalahan: {e}")
 
-input_filename = 'ExportFile_cleantemp.xlsx' 
+input_filename = 'Piutang_cleantemp.xlsx' 
 output_filename = 'cleandepotemp.xlsx'
 config_filename = 'utara.conf'
 

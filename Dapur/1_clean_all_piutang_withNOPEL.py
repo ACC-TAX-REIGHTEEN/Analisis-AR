@@ -9,7 +9,7 @@ def clean_data_autofit(input_file, output_file):
     except:
         df = pd.read_excel(input_file, header=3)
 
-    target_indices = [2, 3, 4, 7, 8, 10, 11, 12, 13, 14]
+    target_indices = [2, 3, 5, 9, 11, 14, 16, 18, 20, 22]
     df_clean = df.iloc[:, target_indices].copy()
 
     new_columns = [
@@ -67,8 +67,8 @@ def clean_data_autofit(input_file, output_file):
 
     return df_clean
 
-input_filename = 'ExportFile.xls' 
-output_filename = 'ExportFile_cleantemp.xlsx'
+input_filename = 'Piutang.xls' 
+output_filename = 'Piutang_cleantemp.xlsx'
 
 if __name__ == "__main__":
     clean_data_autofit(input_filename, output_filename)
