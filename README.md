@@ -26,7 +26,7 @@ Untuk menjalankan sistem ini dengan sukses, pastikan struktur direktori kamu men
 📂 project-root/
 │
 ├── 📄 Analisis_AR.py                   # <-- Orkestrator Utama (Jalankan file ini)
-├── 📄 ExportFile.xls                   # <-- File Data Mentah Mandiri (Input)
+├── 📄 Piutang.xls                   # <-- File Data Mentah Mandiri (Input)
 │
 └── 📂 dapur/                           # Folder internal pemrosesan
     ├── 📄 1_clean_all_piutang_withNOPEL.py
@@ -44,10 +44,10 @@ Untuk menjalankan sistem ini dengan sukses, pastikan struktur direktori kamu men
 
 ## 🔄 Alur Kerja Sistem (Pipeline Workflow)
 
-1. **`Analisis_AR.py` (Orkestrator)** memvalidasi ketersediaan file input (`ExportFile.xls`) dan kelengkapan skrip di folder `dapur/`.
+1. **`Analisis_AR.py` (Orkestrator)** memvalidasi ketersediaan file input (`Piutang.xls`) dan kelengkapan skrip di folder `dapur/`.
 2. File mentah disalin ke folder `dapur/` untuk diolah.
 3. User memilih Area Operasional lewat menu interaktif (Selatan, Utara, IRC ZN, atau Customized).
-4. **Skrip Tahap 1 (`1_clean_...`)** membersihkan data mentah menjadi `ExportFile_cleantemp.xlsx`.
+4. **Skrip Tahap 1 (`1_clean_...`)** membersihkan data mentah menjadi `Piutang_cleantemp.xlsx`.
 5. **Skrip Tahap 2 (`2_separate_...`)** memfilter data berdasarkan aturan file konfigurasi (`.conf`) terkait dan menghasilkan `cleandepotemp.xlsx`.
 6. **Skrip Tahap 3 (`3_analytics_...`)** melakukan agregasi data, membuat grafik, format mata uang, dan menyusun laporan akhir.
 7. Orkestrator memindahkan hasil akhir ke folder utama dengan penamaan area (contoh: `Laporan_Analisis_Piutang_Selatan.xlsx`) dan membersihkan file temporer secara otomatis.
@@ -67,7 +67,7 @@ pip install pandas numpy xlsxwriter openpyxl
 
 ## 🚀 Cara Penggunaan
 
-1. Letakkan file data piutang mentah Anda di **folder utama (root)** dengan nama **`ExportFile.xls`**.
+1. Letakkan file data piutang mentah Anda di **folder utama (root)** dengan nama **`Piutang.xls`**.
 2. Jalankan terminal / command prompt di folder utama tersebut.
 3. Eksekusi skrip konduktor:
 ```bash
