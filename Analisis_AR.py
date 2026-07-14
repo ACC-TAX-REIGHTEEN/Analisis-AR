@@ -7,7 +7,7 @@ import sys
 def run_workflow():
     base_dir = os.getcwd()
     dapur_dir = os.path.join(base_dir, 'dapur')
-    source_file = os.path.join(base_dir, 'ExportFile.xls')
+    source_file = os.path.join(base_dir, 'Piutang.xls')
     
     required_dapur_files = [
         '1_clean_all_piutang_withNOPEL.py',
@@ -23,7 +23,7 @@ def run_workflow():
     ]
 
     if not os.path.exists(source_file):
-        print("Error: File 'ExportFile.xls' tidak ditemukan di folder ini.")
+        print("Error: File 'Piutang.xls' tidak ditemukan di folder ini.")
         return
 
     if not os.path.exists(dapur_dir):
@@ -42,7 +42,7 @@ def run_workflow():
         return
 
     print("Membersihkan folder dapur...")
-    dapur_export_file = os.path.join(dapur_dir, 'ExportFile.xls')
+    dapur_export_file = os.path.join(dapur_dir, 'Piutang.xls')
     if os.path.exists(dapur_export_file):
         os.remove(dapur_export_file)
 
@@ -50,7 +50,7 @@ def run_workflow():
     for f in temp_files:
         os.remove(f)
 
-    print("Menyalin ExportFile.xls ke dapur...")
+    print("Menyalin Piutang.xls ke dapur...")
     shutil.copy(source_file, dapur_export_file)
 
     print("\nPilih Area Operasional:")
@@ -118,8 +118,8 @@ def run_workflow():
     except Exception as e:
         print(f"\nError tidak terduga: {e}")
     finally:
-        if os.path.exists('ExportFile.xls'):
-            os.remove('ExportFile.xls')
+        if os.path.exists('Piutang.xls'):
+            os.remove('Piutang.xls')
             
         if os.path.exists('Laporan_Analisis_Piutang.xlsx'):
             os.remove('Laporan_Analisis_Piutang.xlsx')    
