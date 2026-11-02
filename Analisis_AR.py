@@ -10,12 +10,12 @@ def run_workflow():
     source_file = os.path.join(base_dir, 'Piutang.xls')
     
     required_dapur_files = [
-        '1_clean_all_piutang_withNOPEL.py',
-        '2_separate_depo_customized.py',
-        '2_separate_depo_IRCZN.py',
-        '2_separate_depo_selatan.py',
-        '2_separate_depo_utara.py',
-        '3_analytics_salesman.py',
+        '1_CleanerAcc.py',
+        '2_Split_Customized.py',
+        '2_Split_IRCZN.py',
+        '2_Split_Selatan.py',
+        '2_Split_Utara.py',
+        '3_Analytics.py',
         'customized.conf',
         'irczn.conf',
         'selatan.conf',
@@ -67,30 +67,30 @@ def run_workflow():
     if choice == '1':
         suffix_nama = "_Selatan"
         scripts_to_run = [
-            '1_clean_all_piutang_withNOPEL.py',
-            '2_separate_depo_selatan.py',
-            '3_analytics_salesman.py'
+            '1_CleanerAcc.py',
+            '2_Split_Selatan.py',
+            '3_Analytics.py'
         ]
     elif choice == '2':
         suffix_nama = "_Utara"
         scripts_to_run = [
-            '1_clean_all_piutang_withNOPEL.py',
-            '2_separate_depo_utara.py',
-            '3_analytics_salesman.py'
+            '1_CleanerAcc.py',
+            '2_Split_Utara.py',
+            '3_Analytics.py'
         ]
     elif choice == '3':
         suffix_nama = "_IRC_ZN"
         scripts_to_run = [
-            '1_clean_all_piutang_withNOPEL.py',
-            '2_separate_depo_IRCZN.py',
-            '3_analytics_salesman.py'
+            '1_CleanerAcc.py',
+            '2_Split_IRCZN.py',
+            '3_Analytics.py'
         ]
     elif choice == '4':
         suffix_nama = "_Customized"
         scripts_to_run = [
-            '1_clean_all_piutang_withNOPEL.py',
-            '2_separate_depo_customized.py',
-            '3_analytics_salesman.py'
+            '1_CleanerAcc.py',
+            '2_Split_Customized.py',
+            '3_Analytics.py'
         ]    
     else:
         print("Pilihan tidak valid.")
